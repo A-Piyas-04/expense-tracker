@@ -1,1 +1,10 @@
+docker compose up -d
+docker ps
+
+
+erify Database Connection :
+docker exec -it expense_postgres psql -U expense_user -d expense_db
+\dt
+\q (exit)
+
 uvicorn app.main:app --reload
