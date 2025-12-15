@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
+from sqlalchemy import func
 from typing import List
-from datetime import date
+from datetime import date,datetime
 
 
 from app.database import get_session
@@ -84,3 +85,47 @@ def delete_expense(
     session.delete(expense)
     session.commit()
     return {"message": "Expense deleted"}
+
+
+
+
+@router.get("/summary/monthly")
+def monthly_summary(
+    year: int,
+    month: int,
+    session: Session = Depends(get_session)
+):
+    start_date = datetime(year, month, 1)
+
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1)
+    else:
+        end_date = datetime(year, month + 1, 1)
+
+    # Total amount for the month
+    total = session.exec(
+        select(func.sum(Expense.amount))
+        .where(Expense.created_at >= start_date)
+        .where(Expense.created_at < end_date)
+    ).one()
+
+    total_amount = total or 0.0
+
+    # Category-wise breakdown
+    results = session.exec(
+        select(Expense.category, func.sum(Expense.amount))
+        .where(Expense.created_at >= start_date)
+        .where(Expense.created_at < end_date)
+        .group_by(Expense.category)
+    ).all()
+
+    by_category = {
+        category: amount for category, amount in results
+    }
+
+    return {
+        "year": year,
+        "month": month,
+        "total_amount": total_amount,
+        "by_category": by_category
+    }
