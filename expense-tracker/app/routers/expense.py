@@ -45,13 +45,6 @@ def create_expense(
     return db_expense
 
 
-@router.get("/", response_model=List[Expense])
-def list_expenses(session: Session = Depends(get_session)):
-    statement = select(Expense)
-    expenses = session.exec(statement).all()
-    return expenses
-
-
 @router.put("/{expense_id}", response_model=Expense)
 def update_expense(
     expense_id: int,

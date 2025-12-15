@@ -18,8 +18,8 @@ services:
     build: .
     container_name: expense_api
     restart: always
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://expense_user:expense_pass@db:5432/expense_db
     ports:
       - "8000:8000"
     depends_on:
