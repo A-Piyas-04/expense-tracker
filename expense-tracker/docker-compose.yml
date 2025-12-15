@@ -5,14 +5,25 @@ services:
     image: postgres:15
     container_name: expense_postgres
     restart: always
-    ports:
-      - "5433:5432"
     environment:
       POSTGRES_USER: expense_user
       POSTGRES_PASSWORD: expense_pass
       POSTGRES_DB: expense_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  api:
+    build: .
+    container_name: expense_api
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
 
 volumes:
   postgres_data:
